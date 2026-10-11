@@ -3,7 +3,7 @@ import receiptLogoAsset from "@/assets/receipt-logo.png";
 /**
  * The FIXED receipt logo.
  *
- * This is the approved Sahil Road Lines artwork printed on every memo
+ * This is the approved Sahil Roadlines artwork printed on every memo
  * receipt (screen preview, print portal, PDF/PNG download and share). It is
  * a protected application asset and is deliberately INDEPENDENT from the
  * client-configurable application logo stored in Settings (`settings.logoUrl`),

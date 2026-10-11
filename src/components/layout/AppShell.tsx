@@ -26,7 +26,7 @@ import {
 import { LogOut, ChevronDown } from "lucide-react";
 import { useAuth, isSuperAdmin } from "@/lib/AuthContext";
 import { toast } from "sonner";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, companyBrand } from "@/lib/format";
 import { useCompanyLogo } from "@/lib/useCompanyLogo";
 
 const allNav = [
@@ -110,7 +110,7 @@ export function AppShell({
           )}
           <div className="leading-tight">
             <div className="text-[14px] font-bold tracking-wide">
-              {settings?.companyName ?? "SAHIL ROAD LINES"}
+              {companyBrand(settings?.companyName)}
             </div>
             <div className="text-[10px] uppercase tracking-[0.14em] text-white/60">
               Transport ERP

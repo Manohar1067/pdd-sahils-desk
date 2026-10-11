@@ -1,6 +1,6 @@
 ﻿/**
  * ============================================================================
- *  DATA STORE — Sahil Road Lines ERP (Supabase-backed)
+ *  DATA STORE — Sahil Roadlines ERP (Supabase-backed)
  * ----------------------------------------------------------------------------
  *  Same exported functions/types as the original localStorage version —
  *  every UI component that imports from this file needs zero changes.
@@ -153,6 +153,15 @@ export type MemoInput = Omit<
   Memo,
   "id" | "memoNumber" | "isDeleted" | "createdAt" | "updatedAt" | "deletedAt"
 >;
+
+/**
+ * Default statement seeded into the New Memo form's "Consignee" field (the
+ * source / originating party, persisted in `memo.consignor`). The receipt reuses
+ * the SAME default as its fallback, so a memo with no stored Consignee value
+ * prints this statement instead of a bare "—". It is only a fallback: any value
+ * actually stored in `memo.consignor` is always shown unchanged.
+ */
+export const DEFAULT_CONSIGNEE_TEXT = "As per the challan";
 
 // -------------------------- ROW <-> APP TYPE MAPPING -------------------------
 // Supabase columns are snake_case; app types are camelCase.
@@ -665,8 +674,9 @@ export async function peekNextMemoNumber(): Promise<string> {
  * is surfaced unchanged.
  */
 function isMissingConsignorColumn(error: { message?: string | null } | null): boolean {
-  const message = String(error?.message ?? "");
-  return message.includes("consignor") && /column|schema/i.test(message);
+  const message = String(error?.message ?? "").toLowerCase();
+  // Match only the specific schema cache missing column error for 'consignor'
+  return message.includes("consignor") && message.includes("column") && message.includes("schema");
 }
 
 export async function createMemo(input: MemoInput): Promise<Memo> {

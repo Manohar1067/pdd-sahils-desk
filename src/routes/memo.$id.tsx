@@ -1,8 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { useStoreData } from "@/lib/useStore";
-import { getMemo, getTruck, getConsignee, getSettings, type Memo, type FleetTruck, type Consignee, type Settings } from "@/lib/dataStore";
-import { formatDate, formatMoney, normalizeTruckNumber } from "@/lib/format";
+import { getMemo, getTruck, getConsignee, getSettings, DEFAULT_CONSIGNEE_TEXT, type Memo, type FleetTruck, type Consignee, type Settings } from "@/lib/dataStore";
+import { formatDate, formatMoney, normalizeTruckNumber, companyBrand } from "@/lib/format";
 import { formatDisplayText } from "@/lib/textUtils";
 import { DEFAULT_TERMS_TEXT, TERMS_PER_COLUMN, chunkTerms, resolveTerms } from "@/lib/terms";
 import { RECEIPT_LOGO_URL } from "@/lib/receiptLogo";
@@ -124,7 +124,7 @@ function saveBlob(blob: Blob, name: string) {
 }
 
 /**
- * The SRL logo — a close digital recreation of the original Sahil Road Lines
+ * The SRL logo — a close digital recreation of the original Sahil Roadlines
  * diamond branding (navy diamond with "SRL" lettering). Used on receipts when
  * no custom logo is configured, and as a consistent brand mark.
  */
@@ -153,7 +153,7 @@ function SRLDiamond({ size = 76 }: { size?: number }) {
 
 /**
  * The Goods Despatch Memo receipt — faithful digital reproduction of the
- * original physical Sahil Road Lines hard-copy memo.
+ * original physical Sahil Roadlines hard-copy memo.
  *
  * Structure mirrors the original:
  *   1. HEADER — logo | company identity | cell numbers
@@ -165,7 +165,7 @@ function SRLDiamond({ size = 76 }: { size?: number }) {
  *   6. FINANCIAL / TRUCK / EXPENSE AREA
  *   7. DECLARATION
  *   8. SIGNATURE — Driver on behalf of Owner
- *   9. COMPANY SIGNATURE — For SAHIL ROAD LINES
+ *   9. COMPANY SIGNATURE — For Sahil Roadlines
  *  10. BOTTOM WARNING
  *
  * ALL business values are dynamic. Nothing is hardcoded.
@@ -201,15 +201,17 @@ export const ReceiptPage = forwardRef<
    * Each value is its OWN stored field and NOTHING else. There is deliberately
    * NO fallback to `fromLocation`, `toLocation` or the other party. Historical
    * memos created before the correction therefore keep printing exactly what
-   * was stored — an empty field stays empty ("—") rather than borrowing an
-   * unrelated value. Historical rows are never rewritten by the app.
+   * was stored. The Consignee row never borrows an unrelated value; when its own
+   * field is empty it falls back to that field's default statement
+    * (DEFAULT_CONSIGNEE_TEXT) so the row is never a bare "—". A value that IS
+   * stored is always shown as-is and is never overwritten.
    */
-  const consignorName = consignee?.companyName || memo.consigneeName || "—";
-  const consigneeName = formatDisplayText(memo.consignor) || "—";
+  const consignorName = consignee?.companyName || memo.consigneeName || "-";
+  const consigneeName = formatDisplayText(memo.consignor) || DEFAULT_CONSIGNEE_TEXT;
 
   // Terms are laid out newspaper-style in columns of at most 5 items each, so a
   // long list stays compact and readable instead of running the receipt onto a
-  // second page: 1–5 conditions → 1 column, 6–10 → 2 columns, 11–15 → 3.
+   // a long list stays compact and readable instead of running the receipt onto a second page: 1–5 conditions → 1 column, 6–10 → 2 columns, 11–15 → 3.
   // Each column continues the numbering (start={col*5 + 1}).
   const termColumns = useMemo(() => chunkTerms(terms), [terms]);
 
@@ -616,7 +618,7 @@ export const ReceiptPage = forwardRef<
               whiteSpace: "nowrap",
             }}
           >
-            {settings.companyName || "SAHIL ROAD LINES"}
+            {companyBrand(settings.companyName)}
           </div>
           <div style={{ fontSize: `${fs(13.5)}px`, fontWeight: 800, color: NAVY, letterSpacing: "0.6px", marginTop: `${s(1)}px`, maxWidth: "100%", overflowWrap: "anywhere" }}>
             TRANSPORT CONTRACTORS &amp; COMMISSION AGENTS
@@ -693,23 +695,23 @@ export const ReceiptPage = forwardRef<
             <span style={cellLabel}>From:</span>
           </div>
           <div style={{ width: "30%", minWidth: 0, padding: `${s(3)}px 8px`, borderRight: `1px solid ${NAVY}`, display: "flex", alignItems: "center" }}>
-            <span style={cellValue}>{formatDisplayText(memo.fromLocation) || "—"}</span>
+            <span style={cellValue}>{formatDisplayText(memo.fromLocation) || "\u2014"}</span>
           </div>
           <div style={{ width: "15%", flexShrink: 0, padding: `${s(3)}px 8px`, background: "#F5F6FA", borderRight: `1px solid ${NAVY}`, display: "flex", alignItems: "center" }}>
             <span style={cellLabel}>To:</span>
           </div>
           <div style={{ width: "35%", minWidth: 0, padding: `${s(3)}px 8px`, display: "flex", alignItems: "center" }}>
-            <span style={cellValue}>{formatDisplayText(memo.toLocation) || "—"}</span>
+            <span style={cellValue}>{formatDisplayText(memo.toLocation) || "\u2014"}</span>
           </div>
         </div>
-        {detailRow("G.C. No.:", memo.gcNo || "—")}
-        {detailRow("Article:", formatDisplayText(memo.materialName) || "—")}
-        {detailRow("Lorry Owner Name:", formatDisplayText(memo.ownerName) || "—")}
-        {detailRow("Driver Name:", formatDisplayText(memo.driverName) || "—")}
+        {detailRow("G.C. No.:", memo.gcNo || "\u2014")}
+        {detailRow("Article:", formatDisplayText(memo.materialName) || "\u2014")}
+        {detailRow("Lorry Owner Name:", formatDisplayText(memo.ownerName) || "\u2014")}
+        {detailRow("Driver Name:", formatDisplayText(memo.driverName) || "\u2014")}
         {detailRow("Consignor:", consignorName)}
         {detailRow("Consignee:", consigneeName)}
-        {detailRow("Description:", formatDisplayText(memo.description) || "—")}
-        {/* Per Ton Rs. | value | Weight | value — side-by-side on one row */}
+        {detailRow("Description:", formatDisplayText(memo.description) || "\u2014")}
+        {/* Per Ton Rs. | value | Weight | value - side-by-side on one row */}
         <div className="flex" style={{ borderBottom: `0px solid ${NAVY}` }}>
           <div style={{ width: "25%", flexShrink: 0, padding: `${s(3)}px 8px`, background: "#F5F6FA", borderRight: `1px solid ${NAVY}`, display: "flex", alignItems: "center" }}>
             <span style={cellLabel}>Per Ton Rs.:</span>
@@ -770,7 +772,7 @@ export const ReceiptPage = forwardRef<
             </div>
             <div className="flex">
               <div style={{ ...cell(true, false), width: "52%", fontWeight: 900, fontSize: `${fs(13)}px` }}>Paid At:</div>
-              <div style={{ ...cell(false, false), width: "48%", fontWeight: 800, color: NAVY, fontSize: `${fs(14.5)}px` }}>{formatDisplayText(memo.paidAt) || "—"}</div>
+               <div style={{ ...cell(false, false), width: "48%", fontWeight: 800, color: NAVY, fontSize: `${fs(14.5)}px` }}>{formatDisplayText(memo.paidAt) || "\u2014"}</div>
             </div>
           </div>
 
@@ -786,7 +788,7 @@ export const ReceiptPage = forwardRef<
           <div style={{ borderRight: `1px solid ${NAVY}`, display: "flex", flexDirection: "column", minWidth: 0 }}>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: `${s(4)}px ${s(2)}px`, minHeight: 0 }}>
               <div style={{ fontSize: `${fs(13.5)}px`, fontWeight: 800, color: "#3A4356", textAlign: "center" }}>Truck No.:</div>
-              <div ref={truckValRef} style={{ fontSize: `${truckPx ?? fs(21)}px`, fontWeight: 900, color: NAVY, lineHeight: 1.1, textAlign: "center", overflowWrap: "anywhere", wordBreak: "break-word" }}>{truckNo}</div>
+               <div ref={truckValRef} style={{ fontSize: `${truckPx ?? fs(21)}px`, fontWeight: 900, color: NAVY, lineHeight: 1.1, textAlign: "center", overflowWrap: "anywhere", wordBreak: "break-word" }}>{truckNo}</div>
             </div>
           </div>
 
@@ -880,7 +882,7 @@ export const ReceiptPage = forwardRef<
           <div style={{ fontSize: `${fs(10)}px`, fontWeight: 600, color: "#777" }}>on behalf of the Owner</div>
         </div>
         <div style={{ flex: 1, padding: `${s(6)}px 14px`, textAlign: "center", minHeight: `${s(112)}px` }}>
-          <div style={{ fontSize: `${fs(11)}px`, fontWeight: 700, color: "#555", marginTop: `${s(66)}px` }}>For <b style={{ color: NAVY, fontWeight: 800 }}>{settings.companyName || "SAHIL ROAD LINES"}</b></div>
+          <div style={{ fontSize: `${fs(11)}px`, fontWeight: 700, color: "#555", marginTop: `${s(66)}px` }}>For <b style={{ color: NAVY, fontWeight: 800 }}>{companyBrand(settings.companyName)}</b></div>
           <div style={{ fontSize: `${fs(10)}px`, fontWeight: 600, color: "#777" }}>Authorised Signatory</div>
         </div>
       </div>
@@ -920,7 +922,7 @@ function MemoView() {
 
   /** Non-null settings so the shared document always receives a valid value. */
   const safeSettings: Settings = settings ?? {
-    companyName: "SAHIL ROAD LINES",
+    companyName: "Sahil Roadlines",
     address: "",
     phone: "",
     email: "",
@@ -981,7 +983,7 @@ function MemoView() {
   };
 
   const shareText = () =>
-    `${settings?.companyName ?? "Sahil Road Lines"}\nMemo ${memo?.memoNumber}\nDate: ${formatDate(memo?.dispatchDate ?? "")}\nTruck: ${normalizeTruckNumber(truck?.truckNumber || memo?.truckNumber) || "—"}\nMaterial: ${formatDisplayText(memo?.materialName) || "—"}\nFinal Payable: ${formatMoney(memo?.finalPayable ?? 0)}`;
+    `${companyBrand(settings?.companyName)}\nMemo ${memo?.memoNumber}\nDate: ${formatDate(memo?.dispatchDate ?? "")}\nTruck: ${normalizeTruckNumber(truck?.truckNumber || memo?.truckNumber) || "—"}\nMaterial: ${formatDisplayText(memo?.materialName) || "—"}\nFinal Payable: ${formatMoney(memo?.finalPayable ?? 0)}`;
 
   const shareWhatsApp = async () => {
     if (!memo) return;

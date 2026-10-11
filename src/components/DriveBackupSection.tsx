@@ -296,7 +296,7 @@ export function DriveBackupSection({ onPickImportFile }: Props) {
       )}
 
       <p className="mt-3 text-xs text-muted-foreground">
-        This uses a separate Google authorisation from your Sahil Road Lines login, and requests
+        This uses a separate Google authorisation from your Sahil Roadlines login, and requests
         only the <code className="rounded bg-muted px-1">drive.file</code> scope — the app can read
         and write only the backup files it created. No Google client secret is stored in the
         browser.

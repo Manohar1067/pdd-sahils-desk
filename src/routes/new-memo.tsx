@@ -4,7 +4,7 @@ import { useStoreData } from "@/lib/useStore";
 import {
   getTrucks, getConsignees, createMemo, updateMemo, getMemo, peekNextMemoNumber,
   ensureConsigneeExists, ensureTruckExists, syncMemoToTransport,
-  ALL_MEMO_STATUSES,
+  ALL_MEMO_STATUSES, DEFAULT_CONSIGNEE_TEXT,
   type FleetTruck, type Consignee, type MemoStatus, type MemoInput,
 } from "@/lib/dataStore";
 import { useEffect, useMemo, useState } from "react";
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Combobox } from "@/components/Combobox";
-import { toInputDate, fromInputDate, normalizeTruckNumber } from "@/lib/format";
+import { toInputDate, fromInputDate, toDateKey, normalizeTruckNumber } from "@/lib/format";
 import { toast } from "sonner";
 import { ensureTransportEntryForMemo } from "@/lib/transportListStore";
 import { useAuth, isSuperAdmin } from "@/lib/AuthContext";
@@ -62,14 +62,18 @@ function Field({ label, children, required }: { label: string; children: React.R
 }
 
 const emptyForm = (): MemoInput => ({
-  dispatchDate: new Date().toISOString(),
+  // Local calendar date (YYYY-MM-DD) so the picker shows today and the value
+  // saved (when the user leaves it untouched) matches the calendar date — a
+  // UTC `new Date().toISOString()` timestamp comes out a day behind before 5:30
+  // AM in IST and could be stored as the previous day.
+  dispatchDate: toDateKey(new Date()),
   fromLocation: "",
   toLocation: "",
   // Default starting value for the Consignee field on a NEW memo. It is only a
   // seed — the field stays fully editable (append/edit/replace) and the value
   // the user saves is what gets persisted. Existing memos are never touched:
   // Edit mode loads the stored value instead of this default.
-  consignor: "As per the challan",
+  consignor: DEFAULT_CONSIGNEE_TEXT,
   transportName: "",
   consigneeId: "",
   truckId: "",
@@ -164,6 +168,7 @@ function NewMemo() {
       if (m) {
         const { id, memoNumber, isDeleted, createdAt, updatedAt, deletedAt, ...rest } = m;
         void id; void memoNumber; void isDeleted; void createdAt; void updatedAt; void deletedAt;
+        if (!rest.consignor) rest.consignor = DEFAULT_CONSIGNEE_TEXT;
         setForm(rest);
         // Keep a stored manual Net Freight: opening for edit must NOT let the
         // auto-calc effect recompute it (and later save the new value).

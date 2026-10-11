@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  TRANSPORT LIST STORE — Sahil Road Lines ERP
+ *  TRANSPORT LIST STORE — Sahil Roadlines ERP
  * ----------------------------------------------------------------------------
  *  Completely independent from dataStore.ts / the memos table.
  *  Backed only by the `transport_list` Supabase table.

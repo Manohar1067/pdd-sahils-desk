@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- *  GOOGLE DRIVE BACKUP — Sahil Road Lines ERP
+ *  GOOGLE DRIVE BACKUP — Sahil Roadlines ERP
  * ----------------------------------------------------------------------------
  *  Client-side Google Drive integration for the Excel backup in Settings →
  *  Backup/Restore.
@@ -28,7 +28,7 @@
  *    Supabase database, never written to `localStorage`, and never logged.
  *    `disconnectGoogleDrive()` revokes it at Google and clears it locally.
  *  - Supabase Auth (email + PIN) is entirely separate from this. Signing in to
- *    Sahil Road Lines does NOT connect Google Drive, and connecting Google
+ *    Sahil Roadlines does NOT connect Google Drive, and connecting Google
  *    Drive does NOT sign anybody in or grant any app access.
  *
  *  WORKBOOK PROVENANCE

@@ -34,13 +34,13 @@ export default function LoginPage() {
       >
         <div className="flex flex-col items-center mb-8">
           {logoUrl ? (
-            <img src={logoUrl} alt="Sahil Road Lines logo" className="mb-3 h-20 w-20 rounded-lg object-contain" />
+            <img src={logoUrl} alt="Sahil Roadlines logo" className="mb-3 h-20 w-20 rounded-lg object-contain" />
           ) : (
             <div className="w-20 h-20 rounded-lg bg-[#0B2A55] flex items-center justify-center mb-3">
               <span className="text-white font-bold text-2xl">SRL</span>
             </div>
           )}
-          <h1 className="text-lg font-bold text-[#0B2A55] tracking-wide">SAHIL ROAD LINES</h1>
+          <h1 className="text-lg font-bold text-[#0B2A55] tracking-wide">Sahil Roadlines</h1>
           <p className="text-xs text-gray-500 tracking-widest">TRANSPORT ERP</p>
         </div>
 

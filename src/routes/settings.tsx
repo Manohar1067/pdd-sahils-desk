@@ -440,8 +440,8 @@ function SettingsContent() {
           <p className="mb-3 text-xs text-muted-foreground">
             One condition per line. The receipt prints these automatically in up to three columns
             (1&ndash;5 in the first, 6&ndash;10 in the second, 11&ndash;15 in the third). Leave the
-            box empty to print the {DEFAULT_TERMS.length} conditions from the original Sahil Road
-            Lines Conditions document.
+            box empty to print the {DEFAULT_TERMS.length} conditions from the original Sahil Roadlines
+            Conditions document.
           </p>
           <Textarea rows={10} value={form.terms} onChange={(e) => set("terms", e.target.value)} />
           <div className="mt-3 flex items-center gap-3">
@@ -600,7 +600,7 @@ function SettingsContent() {
             records previously deleted are restored, and missing records are added.
           </div>
 
-          {/* Google Drive — a separate authorisation from the Sahil Road Lines login.
+          {/* Google Drive — a separate authorisation from the Sahil Roadlines login.
               The Drive workbook is produced by the same buildBackupWorkbook() that the
               download button above uses, and a chosen Drive file flows into the existing
               import confirmation / summary dialogs above. */}

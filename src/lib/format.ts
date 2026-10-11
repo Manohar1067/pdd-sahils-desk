@@ -69,17 +69,37 @@ export function compareMemoNumberDesc(a: string | null | undefined, b: string | 
   return String(b).localeCompare(String(a), "en", { numeric: true });
 }
 
+/**
+ * Calendar date (YYYY-MM-DD) in the *local* timezone for an <input type="date">.
+ * Uses the local getters — like formatDate()/toDateKey() — so the value shown
+ * in the picker always matches the date as displayed elsewhere. Using
+ * toISOString().slice(0,10) here read the UTC date, which is a day behind the
+ * local calendar in positive-offset timezones (e.g. IST) and made the picker
+ * show the previous day after saving/reloading.
+ */
 export function toInputDate(iso: string | undefined | null): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
-  return d.toISOString().slice(0, 10);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
+/**
+ * Normalizes a picked <input type="date"> value to the same calendar date as a
+ * stable `YYYY-MM-DD` string. This round-trips through toInputDate()/formatDate()
+ * without any UTC/local shift and is safe for both Postgres `date` columns and
+ * for rendering. The previous implementation returned a UTC ISO timestamp
+ * (`…T18:30:00.000Z` in IST), so the stored date could drift by one day.
+ */
 export function fromInputDate(v: string): string {
   if (!v) return "";
   const d = new Date(v + "T00:00:00");
-  return isNaN(d.getTime()) ? "" : d.toISOString();
+  if (isNaN(d.getTime())) return "";
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
 /**
@@ -177,4 +197,41 @@ export function qualifiesForStatus(r: WorkflowStatusFields, status: string): boo
     case "LR Submitted": return hasLRSubmitted(r);
     default: return effectiveWorkflowStatus(r) === status;
   }
+}
+
+/**
+ * Canonical company brand name. Every place the business displays its own name
+ * (login, app shell, receipts, print templates, share text) uses this single
+ * value, so the brand is consistent app-wide.
+ */
+export const COMPANY_BRAND = "Sahil Roadlines";
+
+/**
+ * Known historical/legacy spellings of the brand, each normalized (trimmed,
+ * whitespace-collapsed, lower-cased) to the canonical COMPANY_BRAND.
+ */
+const BRAND_VARIANTS = new Set([
+  "sahil road lines",
+  "sahil roadlines",
+  "sahil-road lines",
+  "sahil road-lines",
+  "sahil road lines transport",
+  "sahil roadlines transport",
+  "sahil roadlines & carriers",
+]);
+
+/**
+ * Returns the canonical brand for a stored company-name value.
+ *
+ * A stored setting that is clearly this brand (any casing/whitespace variant of
+ * the legacy `Sahil Road Lines`) prints as `Sahil Roadlines`, so receipts and
+ * headers stay standardized even when the settings row holds a legacy spelling.
+ * A genuinely different (custom) company name is returned unchanged, and the
+ * canonical brand is used when the value is empty.
+ */
+export function companyBrand(name?: string | null): string {
+  const v = (name ?? "").trim().replace(/\s+/g, " ");
+  if (!v) return COMPANY_BRAND;
+  if (BRAND_VARIANTS.has(v.toLowerCase())) return COMPANY_BRAND;
+  return v;
 }
